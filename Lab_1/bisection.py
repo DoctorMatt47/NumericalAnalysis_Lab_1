@@ -5,6 +5,8 @@ def execute(func):
     c = 0
     while abs(a - b) > eps:
         c = (a + b) / 2
-        if func(c) * func(a) < 0: b = c
-        else: a = c
+        if func(c) * func(a) < 0:
+            b = c
+        else:
+            a = c
     return c
