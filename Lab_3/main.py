@@ -94,7 +94,7 @@ def main():
 
     x_array = np.array([1., 1., 1., 1.])
     x = relaxation(system, x_array)
-    print("Relaxation:")
+    print("\nRelaxation:")
     print("x: ", x)
     print("System(x): ", system(x))
 

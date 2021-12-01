@@ -58,7 +58,7 @@ def d_func(x):
 
 def main():
     print()
-    print(f"Simple iteration method: {relaxation(func)}")
+    print(f"Relaxation method: {relaxation(func)}")
     print(f"Bisection method: {bisection(func)}")
     print(f"Newton method: {newtone(func, d_func)}")
 
