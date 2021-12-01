@@ -47,47 +47,6 @@ def newton(y, x):
     return poly
 
 
-def spline(y, x):
-    tridiag_a = np.zeros((x.size - 2, x.size - 2))
-    b = np.empty(x.size - 2)
-
-    for i in range(0, x.size - 2):
-        b[i] = (y[i + 2] - y[i + 1]) / (x[i + 2] - x[i + 1]) - (y[i + 1] - y[i]) / (x[i + 1] - x[i])
-        if i > 0:
-            tridiag_a[i, i - 1] = (x[i + 1] - x[i]) / 6
-        tridiag_a[i, i] = (x[i + 2] - x[i]) / 3
-        if i < x.size - 3:
-            tridiag_a[i, i + 1] = (x[i + 2] - x[i + 1]) / 6
-
-    m = np.linalg.solve(tridiag_a, b)
-    m = np.insert(m, 0, 0)
-    m = np.insert(m, m.size, 0)
-
-    polys = []
-
-    for i in range(0, x.size - 1):
-        poly = P([0])
-        h = x[i + 1] - x[i]
-        poly += P([x[i + 1], -1]) ** 3 * (m[i] / (6 * h))
-        poly += P([-x[i], 1]) ** 3 * (m[i + 1] / (6 * h))
-        poly += P([x[i + 1], -1]) * ((y[i] - m[i] * h * h / 6) / h)
-        poly += P([-x[i], 1]) * ((y[i + 1] - m[i + 1] * h * h / 6) / h)
-
-        polys.append(poly.coef)
-
-    return polys
-
-
-def show_spline(spline_polys, n):
-    for i in range(0, n - 1):
-        x_lower = -4 + (8 / (n - 1)) * i
-        x_upper = -4 + (8 / (n - 1)) * (i + 1)
-        x_interval = np.linspace(x_lower, x_upper, 50)
-        print("{0} for [{1}; {2}]".format(spline_polys[i], x_lower, x_upper))
-        plt.plot(x_interval, p.polyval(x_interval, spline_polys[i]))
-    plt.show()
-
-
 def figure(x, y):
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
@@ -101,10 +60,10 @@ def figure(x, y):
 
 
 def main():
-    a, b, n = -4, 4, 9
+    a, b, n = -4, 4, 20
     x = np.linspace(a, b, n)
     y = func(x)
-    real = np.linspace(-4, 4, 100)
+    real = np.linspace(a, b, 100)
 
     lagrange_poly = lagrange(y, x)
     print("Lagrange:", lagrange_poly)
@@ -117,12 +76,6 @@ def main():
     figure(x, y)
     plt.plot(real, p.polyval(real, newton_poly))
     plt.show()
-
-    print("Spline:")
-    spline_poly = spline(y, x)
-    figure(x, y)
-    show_spline(spline_poly, n)
-
 
 if __name__ == '__main__':
     main()

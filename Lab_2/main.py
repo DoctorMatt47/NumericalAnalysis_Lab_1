@@ -28,36 +28,36 @@ def get_vector(size):
     return np.random.rand(size)
 
 
-def gauss(a, b):
-    a = a.copy()
+def gauss(A, b):
+    A = A.copy()
     b = b.copy()
 
-    for i in range(0, a.shape[0]):
-        max_i = i + np.argmax(a[range(i, a.shape[1]), i])
-        max_el = a[max_i, i]
+    for i in range(0, A.shape[0]):
+        max_i = i + np.argmax(A[range(i, A.shape[1]), i])
+        max_el = A[max_i, i]
 
         # Swaps max_i and i
         if max_i != i:
-            a[[max_i, i], :] = a[[i, max_i], :]
+            A[[max_i, i], :] = A[[i, max_i], :]
             b[[max_i, i]] = b[[i, max_i]]
 
-        a[i, :] /= max_el
+        A[i, :] /= max_el
         b[i] /= max_el
 
         # Does zeros under i row
-        for row_index in range(i + 1, a.shape[1]):
-            multiplier = a[row_index, i]
-            a[row_index, :] -= a[i, :] * multiplier
-            b[row_index] -= b[i] * multiplier
+        for j in range(i + 1, A.shape[1]):
+            multiplier = A[j, i]
+            A[j, :] -= A[i, :] * multiplier
+            b[j] -= b[i] * multiplier
 
     x = np.empty_like(b)
 
     # Finds x
-    for i in range(0, a.shape[0]):
-        row_index = x.size - 1 - i
-        x[row_index] = b[row_index]
+    for i in range(0, A.shape[0]):
+        k = x.size - 1 - i
+        x[k] = b[k]
         for j in range(0, i):
-            x[row_index] -= a[row_index, a.shape[1] - 1 - j] * x[x.size - 1 - j]
+            x[k] -= A[k, A.shape[1] - 1 - j] * x[x.size - 1 - j]
 
     return x
 
@@ -70,7 +70,7 @@ def jacoby(A, b, max_steps=50, eps=1e-06):
 
     for i in range(int(max_steps)):
         x_prev = x
-        x = (b - np.dot(R, x)) / D
+        x = (b - R @ x) / D
         if np.allclose(x, x_prev, atol=eps):
             return x
 
@@ -89,6 +89,7 @@ def seidel(A, b, max_steps=1e+3, eps=1e-06):
             for j in range(0, A.shape[1]):
                 if i != j:
                     d -= A[i, j] * x[j]
+
             x[i] = d / A[i, i]
 
         if np.allclose(x, x_prev, atol=eps):
@@ -98,14 +99,14 @@ def seidel(A, b, max_steps=1e+3, eps=1e-06):
 
 
 def jacobi_rotation(a, epsilon=1e-6):
-    u_prod = np.eye(a.shape[0])
+    g_prod = np.eye(a.shape[0])
 
     # Quadratic sum of non-diagonal elements
     t = 0
     for i in range(a.shape[0]):
         for j in range(i, a.shape[1]):
             if i != j:
-                t += 2 * (a[i, j] ** 2)
+                t += a[i, j] ** 2
 
     while t > epsilon:
         # Find max abs non-diagonal element
@@ -121,17 +122,17 @@ def jacobi_rotation(a, epsilon=1e-6):
         else:
             phi = math.atan(2 * max_elem / (a[max_i, max_i] - a[max_j, max_j])) / 2
 
-        u = np.eye(a.shape[0])
-        u[max_i, max_i] = math.cos(phi)
-        u[max_i, max_j] = math.sin(phi)
-        u[max_j, max_i] = -math.sin(phi)
-        u[max_j, max_j] = math.cos(phi)
-        t -= 2 * (max_elem ** 2)
+        g = np.eye(a.shape[0])
+        g[max_i, max_i] = math.cos(phi)
+        g[max_i, max_j] = math.sin(phi)
+        g[max_j, max_i] = -math.sin(phi)
+        g[max_j, max_j] = math.cos(phi)
+        t -= max_elem ** 2
 
-        a = u @ a @ u.transpose()
-        u_prod = u_prod @ u.transpose()
+        a = g @ a @ g.transpose()
+        g_prod = g_prod @ g.transpose()
 
-    return np.diag(a), u_prod
+    return np.diag(a), g_prod
 
 
 def main():

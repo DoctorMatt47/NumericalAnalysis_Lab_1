@@ -39,7 +39,6 @@ def jacoby(x):
             else:
                 result[i, j] += 2 * x[j]
 
-
     return result
 
 
@@ -58,8 +57,7 @@ def newtone_modified(system, jacoby, x, max_steps=1e3, eps=1e-6):
     system_x = system(x)
     counter = 0
     while abs(np.linalg.norm(system_x, ord=2)) > eps and counter < max_steps:
-        jacoby_inv = np.linalg.inv(jacoby(x))
-        x -= jacoby_inv @ system_x
+        x -= np.linalg.inv(jacoby(x)) @ system_x
         system_x = system(x)
         counter += 1
 
